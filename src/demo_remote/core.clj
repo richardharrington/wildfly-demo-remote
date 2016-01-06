@@ -1,21 +1,16 @@
 (ns demo-remote.core
-  (:require [immutant.web :as web]
-            [immutant.caching :as caching]
-            [immutant.messaging :refer :all]
-            [immutant.scheduling :as scheduling]
-            [immutant.transactions :as transactions]
-            [immutant.wildfly :as wildfly]
-            [clojure.pprint :refer (pprint)]
-            [clojure.tools.namespace.repl :refer (refresh refresh-all)]
-
-            )
+  (:require [immutant.messaging :as msg]
+            [immutant.util :as util])
   (:gen-class))
 
-(defn app [request]
-  {:status 200
-   :body "Hello World!"})
+(defn get-context []
+  (when-not (util/in-container?)
+    (msg/context :host "localhost")))
+
+(defn respond [qname callback]
+  (with-open [ctx (get-context)]
+    (msg/respond (msg/queue qname :context ctx) callback)))
 
 (defn -main
   [& args]
-  nil
-  #_(web/run app))
+  nil)
